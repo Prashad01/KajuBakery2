@@ -358,7 +358,7 @@ body {
   .print-ticket-wrap .ov-year     { font-size: 1.2mm; }
   .print-ticket-wrap .ov-month    { font-size: 1.2mm; }
   .print-ticket-wrap .ov-date     { font-size: 1.2mm; }
-  .print-ticket-wrap .ov-duration { font-size: 2.2mm; }
+  /* .print-ticket-wrap .ov-duration { font-size: 2.2mm; } */
   .print-ticket-wrap .ov-price    { font-size: 4.5mm; }
 }
 </style>
@@ -555,7 +555,7 @@ function liveUpdate() {
 
 /* ── Stepper: clamped to 15–20 ──────────────────────────────── */
 function adj(delta) {
-  copies = Math.max(15, Math.min(20, copies + delta));
+  copies = Math.max(15, Math.min(21 copies + delta));
   $('copies-display').textContent = copies;
   $('footer-n').textContent = copies;
   $('footer-s').textContent = copies > 1 ? 's' : '';
