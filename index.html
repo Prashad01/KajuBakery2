@@ -555,7 +555,7 @@ function liveUpdate() {
 
 /* ── Stepper: clamped to 15–20 ──────────────────────────────── */
 function adj(delta) {
-  copies = Math.max(15, Math.min(21 copies + delta));
+  copies = Math.max(15, Math.min(21, copies + delta));
   $('copies-display').textContent = copies;
   $('footer-n').textContent = copies;
   $('footer-s').textContent = copies > 1 ? 's' : '';
