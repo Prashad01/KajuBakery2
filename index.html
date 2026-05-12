@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Kaju Bakery — Ticket Printer</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Dancing+Script:wght@700&family=Lato:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:    #8B2500;
+  --bg:     #f5ede6;
+  --card:   #ffffff;
+  --border: #e5d5c8;
+  --muted:  #9a7060;
+  --text:   #1e0e06;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app { max-width: 540px; margin: 0 auto; padding-bottom: 90px; }
+
+/* Header */
+.header {
+  background: var(--red);
+  padding: 14px 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+.header-brand {
+  font-family: 'Dancing Script', cursive;
+  font-size: 24px; font-weight: 700; color: #fff;
+}
+.header-sub {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+.header-right {
+  font-size: 10px; color: rgba(255,255,255,0.55);
+  text-align: right; line-height: 1.6;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin: 14px 16px;
+  padding: 16px;
+  box-shadow: 0 2px 16px rgba(139,37,0,0.07);
+}
+.card-title {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 9.5px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--red);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Fields */
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 5px; display: block;
+}
+.field input {
+  width: 100%;
+  background: #faf5fd;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 14px; color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(139,37,0,0.09);
+  background: #fff;
+}
+.field input::placeholder { color: #c5ad9e; font-size: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+.today-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 13px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 10px; letter-spacing: 0.5px;
+  color: var(--muted); cursor: pointer;
+  margin-top: 6px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.today-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Font size slider ── */
+.slider-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 8px;
+}
+.slider-row input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 1px 4px rgba(139,37,0,0.35);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.2);
+}
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--red);
+  border: none;
+  cursor: pointer;
+}
+.slider-value {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 13px; color: var(--red);
+  min-width: 34px; text-align: right;
+}
+
+/* Stepper */
+.stepper {
+  display: flex; align-items: center;
+  justify-content: center; gap: 24px; padding: 20px 20;
+}
+.step-btn {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--red); color: #fff; border: none;
+  font-size: 26px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.1s;
+}
+.step-btn:active { transform: scale(0.92); }
+.step-count {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 40px; color: var(--red);
+  min-width: 60px; text-align: center;
+}
+.step-sublabel {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+  text-align: center; margin-top: 3px;
+}
+.layout-note {
+  margin-top: 10px;
+  background: #fdf3ee; border: 1px solid #f0ddd3;
+  border-radius: 8px; padding: 9px 13px;
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.layout-dot { width:7px; height:7px; border-radius:50%; background:var(--red); flex-shrink:0; }
+
+.ticket-wrapper {
+  position: relative;
+  width: 500px;
+  height: 250px;
+  flex-shrink: 0;
+}
+.ticket-wrapper img.ticket-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  user-select: none; pointer-events: none;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Base overlay style */
+.ov {
+  position: absolute;
+  font-family: 'Archivo Black', sans-serif;
+  white-space: nowrap;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Product name */
+.ov-product {
+  left: 24%;
+  top: 50%;
+  color: var(--red);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  max-width: 38%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* Price */
+.ov-price {
+  left: 57.0%;
+  top: 50.3%;
+  color: #ffffff;
+  font-size: 26px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.45);
+}
+
+/* Year pill */
+.ov-year {
+  left: 81.6%;
+  top: 30.5%;
+  color: #ffffff;
+  font-size: 9px;
+  transform: rotate(-90deg);
+}
+
+/* Month pill */
+.ov-month {
+  left: 81.6%;
+  top: 49.5%;
+  color: #ffffff;
+  font-size: 9px;
+  transform: rotate(-90deg);
+}
+
+/* Date pill */
+.ov-date {
+  left: 81.6%;
+  top: 67.8%;
+  color: #ffffff;
+  font-size: 9px;
+  transform: rotate(-90deg);
+}
+
+/* Duration */
+.ov-duration {
+  left: 87.1%;
+  top: 44.4%;
+  color: #99341b;
+  font-size: 9px;
+  transform: rotate(-90deg);
+}
+
+/* Preview container */
+.preview-area {
+  background: #e8ddd5;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 8px;
+  display: flex; justify-content: center; align-items: center;
+  overflow-x: auto;
+  min-height: 200px;
+}
+
+/* Footer */
+.footer-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--red);
+  padding: 12px 16px;
+  display: flex; gap: 10px; justify-content: center;
+  z-index: 200;
+}
+.btn-print {
+  flex: 1; max-width: 380px;
+  background: #fff; color: var(--red);
+  border: none; border-radius: 10px;
+  padding: 14px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 14px; letter-spacing: 0.5px;
+  cursor: pointer; transition: transform 0.1s;
+}
+.btn-print:active { transform: scale(0.98); }
+.btn-clear {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  border-radius: 10px; padding: 14px 18px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 13px; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-clear:hover { background: rgba(255,255,255,0.25); }
+
+/* ─────────────────────────────────────────
+   PRINT STYLES
+   A4 = 210mm. Margins 8mm → usable 194mm.
+   3 tickets per row: 62mm × 35mm each (gap 4mm → 3×62+2×4 = 194mm).
+   15 tickets per A4 sheet max (3 per row × 5 rows).
+
+   PRINT_SCALE = (62mm * 3.7795px/mm) / 500px screen
+               = 234.3px / 500px ≈ 0.4686
+───────────────────────────────────────── */
+@media screen {
+  .print-sheet { display: none; }
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  html, body {
+    margin: 0 !important; padding: 0 !important;
+    background: #fff !important;
+    width: 210mm;
+  }
+  .no-print { display: none !important; }
+
+  .print-sheet {
+    display: block !important;
+    width: 210mm;
+    padding: 8mm;
+  }
+  .print-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4mm;
+    align-content: flex-start;
+    justify-content: flex-start;
+  }
+
+  /* 3 columns × 5 rows = 15 tickets per A4 sheet */
+  .print-ticket-wrap {
+    width: 62mm;
+    height: 35mm;
+    position: relative;
+    overflow: hidden;
+    page-break-inside: avoid;
+    flex-shrink: 0;
+  }
+  .print-ticket-wrap img.ticket-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* Fixed overlay font sizes for print */
+  .print-ticket-wrap .ov-year     { font-size: 1.2mm; }
+  .print-ticket-wrap .ov-month    { font-size: 1.2mm; }
+  .print-ticket-wrap .ov-date     { font-size: 1.2mm; }
+  .print-ticket-wrap .ov-duration { font-size: 2.2mm; }
+  .print-ticket-wrap .ov-price    { font-size: 4.5mm; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SCREEN UI ══════════════ -->
+<div class="app no-print">
+
+  <div class="header">
+    <div>
+      <div class="header-brand">Kaju Bakery</div>
+      <div class="header-sub">Ticket Printer</div>
+    </div>
+    <div class="header-right">Developed & Design by<br/><span><b>Prashad Nath</b></span></div>
+  </div>
+
+  <!-- Live preview -->
+  <div class="card">
+    <div class="card-title">Live Preview</div>
+    <div class="preview-area">
+      <div class="ticket-wrapper" id="preview-ticket">
+        <img class="ticket-bg" src="Price_Ticket.jpg" alt="Kaju Bakery ticket template"/>
+        <span class="ov ov-product"  id="prev-product"></span>
+        <span class="ov ov-price"    id="prev-price"></span>
+        <span class="ov ov-year"     id="prev-year"></span>
+        <span class="ov ov-month"    id="prev-month"></span>
+        <span class="ov ov-date"     id="prev-date"></span>
+        <span class="ov ov-duration" id="prev-duration"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product & Price -->
+  <div class="card">
+    <div class="card-title">Product Details</div>
+    <div class="field">
+      <label class="field-label">Product Name</label>
+      <input type="text" id="f-product"
+             placeholder="e.g. Bread, Biscuit, Ladoo…"
+             oninput="liveUpdate()">
+    </div>
+
+    <!-- Font size slider -->
+    <div class="field">
+      <label class="field-label">Product Font Size</label>
+      <div class="slider-row">
+        <span style="font-family:'Lato',sans-serif;font-size:11px;color:var(--muted);white-space:nowrap">A</span>
+        <input type="range" id="font-slider"
+               min="10" max="50" value="35" step="1"
+               oninput="onSliderChange(this)">
+        <span style="font-family:'Lato',sans-serif;font-size:16px;color:var(--muted);white-space:nowrap">A</span>
+        <span class="slider-value" id="slider-val">35px</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Price (₹)</label>
+      <input type="number" id="f-price"
+             placeholder="e.g. ₹"
+             oninput="liveUpdate()">
+    </div>
+  </div>
+
+  <!-- Manufacturing Date -->
+  <div class="card">
+    <div class="card-title">Manufacturing Date</div>
+    <div class="row3">
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input type="number" id="f-day"
+               placeholder="DD" min="1" max="31"
+               oninput="liveUpdate()">
+      </div>
+      <div class="field">
+        <label class="field-label">Month</label>
+        <input type="number" id="f-month"
+               placeholder="MM" min="1" max="12"
+               oninput="liveUpdate()">
+      </div>
+      <div class="field">
+        <label class="field-label">Year</label>
+        <input type="number" id="f-year"
+               placeholder="YY" min="24" max="99"
+               oninput="liveUpdate()">
+      </div>
+    </div>
+    <button class="today-btn" onclick="setToday()">📅 Use today's date</button>
+
+    <div class="field" style="margin-top:12px">
+      <label class="field-label">Expiry Days</label>
+      <input type="number" id="f-duration"
+             placeholder="e.g. 7" min="1" max="999"
+             oninput="liveUpdate()">
+    </div>
+  </div>
+
+  <!-- Copies -->
+  <div class="card">
+    <div class="card-title">Number of Tickets</div>
+    <div class="stepper">
+      <button class="step-btn" onclick="adj(-1)">−</button>
+      <div>
+        <div class="step-count" id="copies-display">15</div>
+        <div class="step-sublabel">tickets</div>
+      </div>
+      <button class="step-btn" onclick="adj(1)">+</button>
+    </div>
+    <div class="layout-note">
+      <div class="layout-dot"></div>
+      <span id="layout-note-text">
+        15 tickets — fits 15 per A4 sheet (3 per row × 5 rows)
+      </span>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- Footer -->
+<div class="footer-bar no-print">
+  <button class="btn-clear" onclick="clearAll()">Clear</button>
+  <button class="btn-print" onclick="doPrint()">
+    🖨&nbsp; Print <span id="footer-n">15</span> Ticket<span id="footer-s">s</span> on A4
+  </button>
+</div>
+
+<!-- ══════════════ PRINT SHEET ══════════════ -->
+<div class="print-sheet" id="print-sheet">
+  <div class="print-grid" id="print-grid"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const val = id => ($( id )?.value || '').trim();
+const pad2 = n => String(n).padStart(2, '0');
+
+/* ── Ticket count: min 15, max 20, default 15 ── */
+let copies = 15;
+
+/*
+  PRINT_SCALE: screen preview wrapper = 500px wide.
+  Print ticket = 44mm wide. At 96 dpi, 1mm ≈ 3.7795px → 44mm ≈ 166.3px.
+  Scale factor = 166.3 / 500 = 0.3326.
+*/
+let productFontPx = 35;
+const PRINT_SCALE = 234.3 / 500; // ≈ 0.4686
+
+/* ── Slider ─────────────────────────────────────────────────── */
+function onSliderChange(el) {
+  productFontPx = parseInt(el.value, 10);
+
+  const pct = ((productFontPx - 10) / (50 - 10)) * 100;
+  el.style.background =
+    `linear-gradient(to right, var(--red) ${pct}%, var(--border) ${pct}%)`;
+
+  $('slider-val').textContent = productFontPx + 'px';
+  liveUpdate();
+}
+
+/* Initialise slider track fill to match default value (35) on page load */
+(function initSlider() {
+  const el  = $('font-slider');
+  const pct = ((35 - 10) / (50 - 10)) * 100;
+  el.style.background =
+    `linear-gradient(to right, var(--red) ${pct}%, var(--border) ${pct}%)`;
+}());
+
+/* ── Data ───────────────────────────────────────────────────── */
+function getData() {
+  return {
+    product  : val('f-product'),
+    price    : val('f-price') ? '₹ ' + val('f-price') : '',
+    day      : val('f-day')      ? pad2(val('f-day'))   : '',
+    month    : val('f-month')    ? pad2(val('f-month')) : '',
+    year     : val('f-year')     ? val('f-year')        : '',
+    duration : val('f-duration') ? val('f-duration')    : '',
+  };
+}
+
+/* ── Live preview ───────────────────────────────────────────── */
+function liveUpdate() {
+  const d = getData();
+
+  const prodEl = $('prev-product');
+  prodEl.textContent    = d.product;
+  prodEl.style.fontSize = productFontPx + 'px';
+
+  $('prev-price').textContent    = d.price;
+  $('prev-year').textContent     = d.year;
+  $('prev-month').textContent    = d.month;
+  $('prev-date').textContent     = d.day;
+  $('prev-duration').textContent = d.duration;
+}
+
+/* ── Stepper: clamped to 15–20 ──────────────────────────────── */
+function adj(delta) {
+  copies = Math.max(15, Math.min(20, copies + delta));
+  $('copies-display').textContent = copies;
+  $('footer-n').textContent = copies;
+  $('footer-s').textContent = copies > 1 ? 's' : '';
+
+  const sheets = Math.ceil(copies / 15);
+  const rows   = Math.ceil(copies / 3);
+  $('layout-note-text').textContent =
+    `${copies} ticket${copies > 1 ? 's' : ''} — ` +
+    `${rows} row${rows > 1 ? 's' : ''} of 3 — ` +
+    `${sheets} A4 sheet${sheets > 1 ? 's' : ''} (15 per sheet)`;
+}
+
+/* ── Today ──────────────────────────────────────────────────── */
+function setToday() {
+  const n = new Date();
+  $('f-day').value   = n.getDate();
+  $('f-month').value = n.getMonth() + 1;
+  $('f-year').value  = String(n.getFullYear()).slice(-2);
+  liveUpdate();
+}
+
+/* ── Clear ──────────────────────────────────────────────────── */
+function clearAll() {
+  ['f-product', 'f-price', 'f-day', 'f-month', 'f-year', 'f-duration']
+    .forEach(id => { $( id ).value = ''; });
+  liveUpdate();
+}
+
+/* ── HTML escape ────────────────────────────────────────────── */
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* ── Build one print ticket ─────────────────────────────────────
+   Product font-size is pre-scaled for the 44mm print wrapper so
+   @media print never needs to override it.
+─────────────────────────────────────────────────────────────── */
+function buildPrintTicket(d) {
+  const printFontPx = (productFontPx * PRINT_SCALE).toFixed(2);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'print-ticket-wrap';
+  wrap.innerHTML = `
+    <img class="ticket-bg" src="Price_Ticket.jpg" alt="Preview Price Ticket"/>
+    <span class="ov ov-product"  style="font-size:${printFontPx}px">${esc(d.product)}</span>
+    <span class="ov ov-price">${esc(d.price)}</span>
+    <span class="ov ov-year">${esc(d.year)}</span>
+    <span class="ov ov-month">${esc(d.month)}</span>
+    <span class="ov ov-date">${esc(d.day)}</span>
+    <span class="ov ov-duration">${esc(d.duration)}</span>
+  `;
+  return wrap;
+}
+
+/* ── Print ──────────────────────────────────────────────────── */
+function doPrint() {
+  const d    = getData();
+  const grid = $('print-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < copies; i++) {
+    grid.appendChild(buildPrintTicket(d));
+  }
+  setTimeout(() => window.print(), 350);
+}
+
+/* ── Init ───────────────────────────────────────────────────── */
+liveUpdate();
+/* Trigger stepper display update to sync footer text */
+adj(0);
+</script>
+</body>
+</html>
